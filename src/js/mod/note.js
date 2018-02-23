@@ -41,7 +41,8 @@ Note.prototype = {
         var tpl = `
         <div class="note">
             <div class="note-head">
-                <span class="delete">X</span>
+                <span class="username"></span>
+                <span class="delete">&times;</span>
             </div>
             <div class = "note-ct" contenteditable="true"></div>
         </div>
@@ -103,7 +104,6 @@ Note.prototype = {
                 evtY = e.pageY - $note.offset().top
             $note.addClass('draggable').data('evtPos',{x:evtX,y:evtY})
             //把事件到dialog的边缘的距离保存下来
-
         }).on('mouseup',function(){
             $note.removeClass('draggable').removeData('pos')
         })
@@ -116,19 +116,19 @@ Note.prototype = {
             })
         })
 
-
     },
 
     edit:function(msg){
+        console.log('edit...')
         var self = this;
         $.post('/api/notes/edit',{
             id:this.id,
-            note: msg
+            note: msg 
         }).done(function(ret){
             if(ret.status === 0){
-                console.log('updata success')
+                Toast('add : updata success');
             }else{
-                console.log(ret.errorMsg)
+                Toast(ret.errorMsg);
             }
         })
     },
@@ -139,9 +139,11 @@ Note.prototype = {
         $.post('/api/notes/add',{note:msg})
             .done(function(ret){
                 if(ret.status === 0){
-                    Toast('updata success')
+                    Toast('add : updata success')
                 }else{
-                    Toast(ret.errorMsg)
+                    self.$note.remove();
+                    Event.fire('waterfall')
+                    Toast(ret.errorMsg);
                 }
             })
 
@@ -150,7 +152,7 @@ Note.prototype = {
 
     delete:function(){
         var self = this
-        $.post('/api/notes/add',{id:this.id})
+        $.post('/api/notes/delete',{id:this.id})
             .done(function(ret){
                 if(ret.status === 0){
                     Toast('delete success')

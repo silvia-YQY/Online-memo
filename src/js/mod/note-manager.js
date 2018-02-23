@@ -3,7 +3,6 @@ var Note = require('./note.js').Note;
 var Toast = require('./toast.js').Toast;
 var Event = require('mod/event.js');
 
-
 var NoteManager = (function(){
 
   function load() {
@@ -26,8 +25,6 @@ var NoteManager = (function(){
       .fail(function(){
         Toast('网络异常');
       });
-
-
   }
 
   function add(){

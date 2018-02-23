@@ -596,11 +596,11 @@ var EventCenter = (function(){
     }
 
     function fire(evt,args){
-        if(!event[evt]){
+        if(!events[evt]){
             return;
         }
-        for(var i = 0; i < event[evt].length; i++){
-            event[evt][i].handler(args);
+        for(var i=0; i<events[evt].length; i++){
+            events[evt][i].handler(args);
         }
     }
 
@@ -634,6 +634,7 @@ NoteManager.load();
 
 $('.add-note').on('click', function() {
   NoteManager.add();
+  WaterFall.init($('#content'));
 })
 
 Event.on('waterfall', function(){
@@ -818,7 +819,6 @@ var Note = __webpack_require__(13).Note;
 var Toast = __webpack_require__(3).Toast;
 var Event = __webpack_require__(4);
 
-
 var NoteManager = (function(){
 
   function load() {
@@ -841,8 +841,6 @@ var NoteManager = (function(){
       .fail(function(){
         Toast('网络异常');
       });
-
-
   }
 
   function add(){
@@ -970,7 +968,8 @@ Note.prototype = {
         var tpl = `
         <div class="note">
             <div class="note-head">
-                <span class="delete">X</span>
+                <span class="username"></span>
+                <span class="delete">&times;</span>
             </div>
             <div class = "note-ct" contenteditable="true"></div>
         </div>
@@ -1032,7 +1031,6 @@ Note.prototype = {
                 evtY = e.pageY - $note.offset().top
             $note.addClass('draggable').data('evtPos',{x:evtX,y:evtY})
             //把事件到dialog的边缘的距离保存下来
-
         }).on('mouseup',function(){
             $note.removeClass('draggable').removeData('pos')
         })
@@ -1045,19 +1043,19 @@ Note.prototype = {
             })
         })
 
-
     },
 
     edit:function(msg){
+        console.log('edit...')
         var self = this;
         $.post('/api/notes/edit',{
             id:this.id,
-            note: msg
+            note: msg 
         }).done(function(ret){
             if(ret.status === 0){
-                console.log('updata success')
+                Toast('add : updata success');
             }else{
-                console.log(ret.errorMsg)
+                Toast(ret.errorMsg);
             }
         })
     },
@@ -1068,9 +1066,11 @@ Note.prototype = {
         $.post('/api/notes/add',{note:msg})
             .done(function(ret){
                 if(ret.status === 0){
-                    Toast('updata success')
+                    Toast('add : updata success')
                 }else{
-                    Toast(ret.errorMsg)
+                    self.$note.remove();
+                    Event.fire('waterfall')
+                    Toast(ret.errorMsg);
                 }
             })
 
@@ -1079,7 +1079,7 @@ Note.prototype = {
 
     delete:function(){
         var self = this
-        $.post('/api/notes/add',{id:this.id})
+        $.post('/api/notes/delete',{id:this.id})
             .done(function(ret){
                 if(ret.status === 0){
                     Toast('delete success')
@@ -1165,56 +1165,60 @@ exports.push([module.i, ".note {\n  position: absolute;\n  color: #333;\n  width
 /* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function($) {var WaterFall = (function(){
-    var $ct
-    var $items
-
+/* WEBPACK VAR INJECTION */(function($) {
+var WaterFall = (function(){
+    var $ct;
+    var $items;
+  
     function render($c){
-        $ct = $c
-        $items = $ct.children();
-
-        var nodeWidth = $items.outerWidth(turn),
-            colNum = parseInt($(window).width()/nodeWidth),
-            colSumHeight = []
-
-        for(var i = 0; i < colNum ; i++){
-            colSumHeight.push(0);
+      $ct = $c;
+      $items = $ct.children();
+  
+      var nodeWidth = $items.outerWidth(true),
+        colNum = parseInt($(window).width()/nodeWidth),
+        colSumHeight = [];
+  
+      for(var i = 0; i<colNum;i++){
+        colSumHeight.push(0);
+      }
+  
+      $items.each(function(){
+        var $cur = $(this);
+  
+        //colSumHeight = [100, 250, 80, 200]
+  
+        var idx = 0,
+          minSumHeight = colSumHeight[0];
+  
+        for(var i=0;i<colSumHeight.length; i++){
+          if(colSumHeight[i] < minSumHeight){
+            idx = i;
+            minSumHeight = colSumHeight[i];
+          }
         }
-
-        $items.each(function(){
-            var $cur = $(this);
-
-            //colSumHeight = [100,250,80,200]
-
-            var idx = 0,
-                minSumHeight = colSumHeight[0];
-
-            for(var i = 0; i < colSumHeight.length;i++){
-                if(colSumHeight[i] < minSumHeight){
-                    idx = i
-                    minSumHeight = colSumHeight[i]
-                }
-            }
-
-            $cur.css({
-                left:nodeWidth*idx,
-                top:minSumHeight
-            })
-
-            colSumHeight[idx] = $cur.outerWidth(true) + colSumHeight;
-        })
-
-        $(window).on('resize',function(){
-            render($ct);
-        })
-
-        return{
-            init:render
-        }
+  
+        $cur.css({
+          left: nodeWidth*idx,
+          top: minSumHeight
+        });
+        colSumHeight[idx] = $cur.outerHeight(true) + colSumHeight[idx];
+      });
     }
-})();
-
-module.exports = WaterFall
+  
+  
+    $(window).on('resize', function(){
+      render($ct);
+    })
+  
+  
+    return {
+      init: render
+    }
+  })();
+  
+  module.exports = WaterFall
+  
+  
 
 //WaterFall.init($('#id')) 使用方法
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))

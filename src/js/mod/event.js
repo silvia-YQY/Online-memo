@@ -11,11 +11,11 @@ var EventCenter = (function(){
     }
 
     function fire(evt,args){
-        if(!event[evt]){
+        if(!events[evt]){
             return;
         }
-        for(var i = 0; i < event[evt].length; i++){
-            event[evt][i].handler(args);
+        for(var i=0; i<events[evt].length; i++){
+            events[evt][i].handler(args);
         }
     }
 
