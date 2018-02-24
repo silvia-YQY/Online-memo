@@ -34,3 +34,5 @@ module.exports = EventCenter
 // EventCenter.on('text-change',function(data){
 //     console.log('on2:',data)
 // })
+
+// EventCenter.fire('text-change', 100);

@@ -620,6 +620,8 @@ module.exports = EventCenter
 //     console.log('on2:',data)
 // })
 
+// EventCenter.fire('text-change', 100);
+
 /***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -969,7 +971,7 @@ Note.prototype = {
         <div class="note">
             <div class="note-head">
                 <span class="username"></span>
-                <span class="delete">&times;</span>
+                <span class="delete">X</span>
             </div>
             <div class = "note-ct" contenteditable="true"></div>
         </div>
@@ -989,10 +991,10 @@ Note.prototype = {
 
     setLayout:function(){
         var self = this;
-        if(self.clk){
-            clearTimeout(self.clk)
+        if(self.clock){
+            clearTimeout(self.clock)
         }
-        self.clk = setTimeout(function(){
+        self.clock = setTimeout(function(){
             Event.fire('waterfall')
         },100)
     },
@@ -1007,19 +1009,21 @@ Note.prototype = {
         $delete.on('click',function(){
             self.delete()
         })
-
+        
         //contenteditable没有 change 事件，所以这做了模拟通过判断元素内容变动，执行save
         $noteCt.on('focus',function(){
-            if($noteCt.html()=='input here') $noteCt.html('')
-            $noteCt.data('before',$noteCt.html())
+            //console.log('html:' ,$noteCt.html())
+            //console.log('this:',$(this))
+            if($(this).html()=='input here') $(this).html('')
+            $(this).data('before',$(this).html())
         }).on('blur paste',function(){
-            if($noteCt.data('before') != $noteCt.html()){
-                $noteCt.data('before',$noteCt.html());
+            if($noteCt.data('before') != $(this).html()){
+                $noteCt.data('before', $(this).html());
                 self.setLayout()
                 if(self.id){
-                    self.edit($noteCt.html())
+                    self.edit($(this).html())
                 }else{
-                    self.add($noteCt.html())
+                    self.add($(this).html())
                 }
             }
         })
@@ -1053,7 +1057,7 @@ Note.prototype = {
             note: msg 
         }).done(function(ret){
             if(ret.status === 0){
-                Toast('add : updata success');
+                Toast('修改成功');
             }else{
                 Toast(ret.errorMsg);
             }
@@ -1066,7 +1070,7 @@ Note.prototype = {
         $.post('/api/notes/add',{note:msg})
             .done(function(ret){
                 if(ret.status === 0){
-                    Toast('add : updata success')
+                    Toast('添加成功')
                 }else{
                     self.$note.remove();
                     Event.fire('waterfall')
@@ -1082,7 +1086,7 @@ Note.prototype = {
         $.post('/api/notes/delete',{id:this.id})
             .done(function(ret){
                 if(ret.status === 0){
-                    Toast('delete success')
+                    Toast('删除成功')
                     self.$note.remove()
                     Event.fire('waterfall')
                 }else{
