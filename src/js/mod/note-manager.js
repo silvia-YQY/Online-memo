@@ -17,6 +17,7 @@ var NoteManager = (function(){
               });
           });
 
+          
           Event.fire('waterfall');
         }else{
           Toast(ret.errorMsg);

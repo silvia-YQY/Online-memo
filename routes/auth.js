@@ -41,7 +41,7 @@ router.get('/jirengu/callback',
     req.session.user = {
       id: req.user._json.id,
       username: req.user._json.name,
-      avatar: req.user._json.avatar, //标识图片
+      avatar: req.user._json.avatar, //头像
       provider: req.user.provider   //认证服务器
     };
     res.redirect('/');

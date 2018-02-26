@@ -23,8 +23,13 @@ sequelize
  const  Note = sequelize.define('note', {
     text: {
       type: Sequelize.STRING
+    },
+    uid:{
+      type:Sequelize.STRING
     }
  });
+ //Note.drop()
+ //Note.sync({force:true})  //第一次创建表
 
  /*
  删除表
