@@ -42,6 +42,9 @@
 2. 启动本地后台服务器
 `npm start`
 
+3. 访问
+`http://localhost:3000`
+
 # 其他
 若要修改项目内容，可在当前目录下运行以下命令
 `npm run watch`
